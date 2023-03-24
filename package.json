@@ -1,0 +1,47 @@
+{
+    "name": "@simply-stream/react-components",
+    "version": "0.1.0",
+    "description": "A set of common components that rely on simply-stream systems or are used by them",
+    "main": "./dist/cjs/index.js",
+    "module": "./dist/esm/index.js",
+    "types": "./dist/esm/index.d.ts",
+    "files": [
+        "/dist"
+    ],
+    "private": false,
+    "scripts": {
+        "build": "rollup -c",
+        "build:watch": "rollup -c --watch"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/Simply-Stream/react-components.git"
+    },
+    "keywords": [
+        "react",
+        "simplystream",
+        "simply-stream",
+        "twitch",
+        "clips",
+        "randomizer"
+    ],
+    "author": "AaricDev <aaricdev@simply-stream.com>",
+    "license": "MIT",
+    "bugs": {
+        "url": "https://github.com/Simply-Stream/react-components/issues"
+    },
+    "homepage": "https://github.com/Simply-Stream/react-components#readme",
+    "devDependencies": {
+        "@types/react": "^18.0.28",
+        "react": "^18.2.0",
+        "tslib": "^2.5.0",
+        "typescript": "^5.0.2"
+    },
+    "dependencies": {
+        "@rollup/plugin-commonjs": "^24.0.1",
+        "@rollup/plugin-node-resolve": "^15.0.1",
+        "@rollup/plugin-typescript": "^11.0.0",
+        "rollup": "^3.20.2",
+        "rollup-plugin-peer-deps-external": "^2.2.4"
+    }
+}
