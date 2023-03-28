@@ -2,16 +2,16 @@
     "name": "@simply-stream/react-components",
     "version": "0.1.0",
     "description": "A set of common components that rely on simply-stream systems or are used by them",
-    "main": "./dist/cjs/index.js",
-    "module": "./dist/esm/index.js",
-    "types": "./dist/esm/index.d.ts",
+    "main": "./dist/index.js",
+    "types": "./dist/types/index.d.ts",
+    "type": "module",
     "files": [
         "/dist"
     ],
     "private": false,
     "scripts": {
         "build": "rollup -c",
-        "build:watch": "rollup -c --watch"
+        "watch": "rollup -c -w"
     },
     "repository": {
         "type": "git",
@@ -32,16 +32,26 @@
     },
     "homepage": "https://github.com/Simply-Stream/react-components#readme",
     "devDependencies": {
-        "@types/react": "^18.0.28",
-        "react": "^18.2.0",
+        "@rollup/plugin-commonjs": "^24.0.1",
+        "@rollup/plugin-json": "^6.0.0",
+        "@rollup/plugin-node-resolve": "^15.0.1",
+        "@rollup/plugin-terser": "^0.4.0",
+        "@rollup/plugin-typescript": "^11.0.0",
+        "@types/react": "^18.0.29",
+        "@types/styled-components": "^5.1.26",
+        "rollup": "^3.20.2",
         "tslib": "^2.5.0",
         "typescript": "^5.0.2"
     },
     "dependencies": {
-        "@rollup/plugin-commonjs": "^24.0.1",
-        "@rollup/plugin-node-resolve": "^15.0.1",
-        "@rollup/plugin-typescript": "^11.0.0",
-        "rollup": "^3.20.2",
-        "rollup-plugin-peer-deps-external": "^2.2.4"
+        "@twurple/api": "^6.0.9",
+        "@twurple/auth": "^6.0.9",
+        "encoding": "^0.1.13",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "styled-components": "^5.3.9"
+    },
+    "peerDependencies": {
+        "react": ">=18.2.0"
     }
 }
