@@ -7,6 +7,7 @@ import styled from 'styled-components';
 
 const BackdropWrapper = styled.div`
   background: rgba(0, 0, 0, .25);
+  color: white;
   padding: .5rem 0;
   position: absolute;
   text-align: center;
