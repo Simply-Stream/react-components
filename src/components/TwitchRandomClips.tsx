@@ -6,6 +6,8 @@ import ClipRandomizer from '../util/clip-randomizer';
 import { GameFilter } from '../util/game-filter';
 import CreatorFilter from '../util/creator-filter';
 
+export type Quality = '1080' | '720' | '460' | '320';
+
 export type TwitchRandomClipsConfig = {
     streamers: string[],
     authentication: { clientId: string, accessToken: string } | { clientId: string, clientSecret: string },
@@ -21,7 +23,7 @@ export type TwitchRandomClipsConfig = {
     },
     startedAt?: number,
     endedAt?: number,
-    quality?: string,
+    quality?: Quality,
 }
 
 export type TwitchRandomClipsProps = {
