@@ -6,7 +6,7 @@ import ClipRandomizer from '../util/clip-randomizer';
 import { GameFilter } from '../util/game-filter';
 import CreatorFilter from '../util/creator-filter';
 
-export type Quality = '1080' | '720' | '460' | '320';
+export type Quality = '1080' | '720' | '480' | '360' | '160';
 
 export type TwitchRandomClipsConfig = {
     streamers: string[],
@@ -85,7 +85,7 @@ const TwitchRandomClips = ({config, classNames, style}: TwitchRandomClipsProps) 
     return (
         <>
             {clip &&
-                <TwitchClip key={clip.id} clip={clip} onClipEnded={onClipEnded}>
+                <TwitchClip key={clip.id} clip={clip} onClipEnded={onClipEnded} quality={config.quality}>
                     <ClipHeader clip={clip}
                                 showClipTitle={config.information?.clip}
                                 showGameName={config.information?.game}

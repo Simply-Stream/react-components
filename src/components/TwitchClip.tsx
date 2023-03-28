@@ -34,18 +34,23 @@ const TwitchClip = (
         const lastSegment = url.split('/').at(-1) ?? '';
         url = url.replace(lastSegment, 'AT-cm%7C' + lastSegment);
     }
-    url = url.replace('-preview-480x272.jpg', '.mp4');
+    url = url.replace('-preview-480x272.jpg', `${quality ? '-' + quality : ''}.mp4`);
 
     useEffect(() => {
         if (!videoRef || !videoRef.current) return;
         const video: HTMLVideoElement = videoRef.current;
 
-        video.load();
         video.onplay = onClipStarted;
+        video.onseeking = () => isLoading(true);
         video.onwaiting = () => isLoading(true);
         video.onplaying = () => isLoading(false);
         video.onended = onClipEnded;
-        video.oncanplaythrough = () => video.play();
+        video.oncanplaythrough = () => {
+            isLoading(false);
+            video.play();
+        };
+        video.onerror = onClipEnded;
+        video.load();
     }, [videoRef])
 
     return (
