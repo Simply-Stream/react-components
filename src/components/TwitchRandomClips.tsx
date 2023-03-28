@@ -1,8 +1,10 @@
 import React, { CSSProperties, useEffect, useMemo, useState } from 'react';
-import { ApiClient, HelixClip, HelixUser } from '@twurple/api';
-import { AppTokenAuthProvider, StaticAuthProvider } from '@twurple/auth';
+import { HelixClip, HelixUser } from '@twurple/api';
 import TwitchClip from './TwitchClip';
 import ClipHeader from './ClipHeader';
+import ClipRandomizer from '../util/clip-randomizer';
+import { GameFilter } from '../util/game-filter';
+import CreatorFilter from '../util/creator-filter';
 
 export type TwitchRandomClipsConfig = {
     streamers: string[],
@@ -29,23 +31,26 @@ export type TwitchRandomClipsProps = {
 }
 
 const TwitchRandomClips = ({config, classNames, style}: TwitchRandomClipsProps) => {
-    let authProvider: StaticAuthProvider | AppTokenAuthProvider;
     const [streamers, setStreamers] = useState<HelixUser[]>([]);
     const [streamersIterable, setStreamersIterable] = useState<HelixUser[]>([]);
     const [index, setIndex] = useState<number | undefined>();
     const [clip, setClip] = useState<HelixClip>();
 
-    const twitchApi = useMemo(() => {
-        if ('accessToken' in config.authentication) {
-            authProvider = new StaticAuthProvider(config.authentication.clientId, config.authentication.accessToken);
-        } else {
-            authProvider = new AppTokenAuthProvider(config.authentication.clientId, config.authentication.clientSecret);
-        }
-        return new ApiClient({authProvider: authProvider});
-    }, [config.authentication])
-
-    useMemo(async () => await twitchApi.users.getUsersByNames(config.streamers), [config.streamers])
-        .then(users => setStreamers(users));
+    const clipRandomizer = useMemo(() => {
+            return new ClipRandomizer(
+                config.authentication,
+                // @TODO: Maybe we'll change this to a more descriptive way in the future ...
+                [
+                    ...(config.allowedGame ? [new GameFilter(config.allowedGame)] : []),
+                    ...(config.deniedGame ? [new GameFilter(config.deniedGame, true)] : []),
+                    ...(config.allowedClipCreators ? [new CreatorFilter(config.allowedClipCreators)] : []),
+                    ...(config.deniedClipCreators ? [new CreatorFilter(config.deniedClipCreators, true)] : []),
+                ],
+            );
+        },
+        [config.authentication],
+    );
+    useMemo(() => clipRandomizer.getUsers(config.streamers), [config.streamers]).then(setStreamers);
 
     useEffect(() => {
         if (streamers?.length === 0) return;
@@ -59,13 +64,19 @@ const TwitchRandomClips = ({config, classNames, style}: TwitchRandomClipsProps) 
         setIndex(idx);
 
         if (!streamer) return;
+        clipRandomizer.getRandomClip(streamer).then(clip => {
+            if (!clip) {
+                // Skip the streamer if there's no clip that suits our requirements
+                onClipEnded(idx);
+                return;
+            }
 
-        twitchApi.clips.getClipsForBroadcaster(streamer.id, {limit: 100}).then((clip) =>
-            setClip(clip.data[Math.floor(Math.random() * clip.data.length)]));
+            setClip(clip);
+        });
     }, [streamers, streamersIterable]);
 
-    function onClipEnded(): void {
-        streamersIterable.splice(index as number, 1);
+    function onClipEnded(idx?: number): void {
+        streamersIterable.splice(idx ?? index as number, 1);
         setStreamersIterable([...streamersIterable]);
     }
 
