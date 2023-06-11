@@ -1,9 +1,9 @@
 import { CSSProperties } from 'react';
-import { HelixClip } from '@twurple/api';
 import StreamerName from './StreamerName';
 import GameName from './GameName';
 import ClipTitle from './ClipTitle';
 import styled from 'styled-components';
+import { Clip } from './TwitchClip';
 
 const BackdropWrapper = styled.div`
   background: rgba(0, 0, 0, .25);
@@ -15,7 +15,7 @@ const BackdropWrapper = styled.div`
 `;
 
 export type ClipHeaderProps = {
-    clip: HelixClip,
+    clip: Clip,
     showClipTitle?: boolean,
     showGameName?: boolean,
     showStreamerName?: boolean,
@@ -25,20 +25,24 @@ export type ClipHeaderProps = {
 
 const ClipHeader = ({clip, showClipTitle, showStreamerName, showGameName, classNames = ''}: ClipHeaderProps) => {
     return (
-        <BackdropWrapper className={`randomizer_backdrop ${classNames}`}>
-            {showStreamerName &&
-                <StreamerName streamer={clip.broadcasterDisplayName}/>
-            }
-            {showGameName &&
-                <GameName game$={clip.getGame()}/>
-            }
+        <>
+            {showStreamerName || showGameName || showClipTitle }
+            <BackdropWrapper className={`randomizer_backdrop ${classNames}`}>
+                {showStreamerName &&
+                    <StreamerName
+                        streamer={clip.broadcasterName}/>
+                }
+                {showGameName &&
+                    <GameName game$={clip.getGame ? clip.getGame() : clip.game}/>
+                }
 
-            {showGameName && showClipTitle && ' - '}
+                {showGameName && showClipTitle && ' - '}
 
-            {showClipTitle &&
-                <ClipTitle clip={clip}/>
-            }
-        </BackdropWrapper>
+                {showClipTitle &&
+                    <ClipTitle clip={clip}/>
+                }
+            </BackdropWrapper>
+        </>
     )
 }
 

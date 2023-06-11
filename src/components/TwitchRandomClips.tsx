@@ -1,6 +1,6 @@
 import React, { CSSProperties, useEffect, useMemo, useState } from 'react';
-import { HelixClip, HelixUser } from '@twurple/api';
-import TwitchClip from './TwitchClip';
+import { HelixUser } from '@twurple/api';
+import TwitchClip, { Clip } from './TwitchClip';
 import ClipHeader from './ClipHeader';
 import ClipRandomizer from '../util/clip-randomizer';
 import { GameFilter } from '../util/game-filter';
@@ -36,7 +36,7 @@ const TwitchRandomClips = ({config, classNames, style}: TwitchRandomClipsProps) 
     const [streamers, setStreamers] = useState<HelixUser[]>([]);
     const [streamersIterable, setStreamersIterable] = useState<HelixUser[]>([]);
     const [index, setIndex] = useState<number | undefined>();
-    const [clip, setClip] = useState<HelixClip>();
+    const [clip, setClip] = useState<Clip>();
 
     const clipRandomizer = useMemo(() => {
             return new ClipRandomizer(
@@ -73,7 +73,20 @@ const TwitchRandomClips = ({config, classNames, style}: TwitchRandomClipsProps) 
                 return;
             }
 
-            setClip(clip);
+            // @TODO: This seems to make problems with "getGame()", might need to change it back to use HelixClip instead
+            setClip({
+                broadcasterId: clip.broadcasterId,
+                broadcasterName: clip.broadcasterDisplayName,
+                creatorId: clip.creatorId,
+                creatorName: clip.creatorDisplayName,
+                duration: clip.duration,
+                gameId: clip.gameId,
+                id: clip.id,
+                thumbnailUrl: clip.thumbnailUrl,
+                title: clip.title,
+                url: clip.url,
+                getGame: clip.getGame,
+            });
         });
     }, [streamers, streamersIterable]);
 

@@ -5,11 +5,15 @@ export interface IClipFilter {
     filter(clips: HelixClip[]): HelixClip[];
 }
 
+export type ClipRandomizerAuthentication =
+    { clientId: string, accessToken: string } |
+    { clientId: string, clientSecret: string };
+
 export default class ClipRandomizer {
     twitchApi!: ApiClient;
 
     constructor(
-        authentication: { clientId: string, accessToken: string } | { clientId: string, clientSecret: string },
+        authentication: ClipRandomizerAuthentication,
         protected filters?: IClipFilter[],
     ) {
         let authProvider: StaticAuthProvider | AppTokenAuthProvider;
