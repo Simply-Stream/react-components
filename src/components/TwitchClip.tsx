@@ -26,7 +26,7 @@ const TwitchClip = (
     }: PropsWithChildren<TwitchClipProps>) => {
     const [isLoading, setLoading] = useState<boolean>(true);
     const videoRef = useRef(null);
-    let url = clip.thumbnailUrl;
+    let url = clip.url.startsWith('https://clips-media-assets2.twitch.tv') ? clip.url : clip.thumbnailUrl;
 
     if (quality && quality !== '1080' && url.indexOf('AT-cm%7C') === -1) {
         const lastSegment = url.split('/').at(-1) ?? '';

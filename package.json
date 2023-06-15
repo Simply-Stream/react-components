@@ -1,6 +1,6 @@
 {
     "name": "@simply-stream/react-components",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "description": "A set of common components that rely on simply-stream systems or are used by them",
     "main": "./dist/index.js",
     "types": "./dist/types/index.d.ts",

@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from 'react';
-import { Streamer } from './TwitchRandomClips';
+import { Streamer, TwitchRandomClipsConfig } from './TwitchRandomClips';
 import TwitchClip from './TwitchClip';
 import ClipHeader from './ClipHeader';
 import { Clip } from '../types/Clip';
@@ -7,9 +7,7 @@ import { Clip } from '../types/Clip';
 type SimplyStreamClipProps = {
     streamer?: Streamer,
     host?: string,
-    showClipTitle?: boolean,
-    showGameName?: boolean,
-    showStreamerName?: boolean,
+    config: TwitchRandomClipsConfig,
     onClipEnded?: () => void,
 }
 
@@ -17,19 +15,26 @@ const SimplyStreamClip: FC<SimplyStreamClipProps> = (
     {
         streamer,
         host = 'https://api.simply-stream.com',
-        showClipTitle = false,
-        showGameName = false,
-        showStreamerName = false,
+        config,
         onClipEnded = () => {
         },
     }) => {
     const [clip, setClip] = useState<Clip>();
 
     useEffect(() => {
-        if (!streamer?.login) return;
+        if (!streamer || !streamer?.login) return;
         const controller = new AbortController();
+        const params = new URLSearchParams({
+            ...(config.startedAt && {started_at: config.startedAt.toString()}),
+            ...(config.endedAt && {ended_at: config.endedAt.toString()}),
+            ...(config.allowedGame && {game_id: config.allowedGame}),
+            ...(config.deniedGame && {deny_games: config.deniedGame}),
+            ...(config.allowedClipCreators && {allow: config.allowedClipCreators.join(',')}),
+            ...(config.deniedClipCreators && {deny: config.deniedClipCreators.join(',')}),
+            ...(config.quality && {quality: config.quality}),
+        });
 
-        fetch(`${host}/api/twitch/users/${streamer?.login}/clips/random`, {signal: controller.signal})
+        fetch(`${host}/api/twitch/users/${streamer?.login}/clips/random?${params}`, {signal: controller.signal})
             .then((response) => response.json())
             .then(data => setClip(data));
 
@@ -39,9 +44,9 @@ const SimplyStreamClip: FC<SimplyStreamClipProps> = (
     return clip &&
         <TwitchClip clip={clip} onClipEnded={onClipEnded}>
             <ClipHeader clip={clip}
-                        showClipTitle={showClipTitle}
-                        showGameName={showGameName}
-                        showStreamerName={showStreamerName}/>
+                        showClipTitle={config?.information?.clip ?? false}
+                        showGameName={config?.information?.game ?? false}
+                        showStreamerName={config?.information?.streamer ?? false}/>
         </TwitchClip>;
 }
 

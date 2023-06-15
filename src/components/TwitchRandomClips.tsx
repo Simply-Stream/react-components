@@ -88,12 +88,12 @@ const TwitchRandomClips = ({standalone = true, config, classNames, style}: Twitc
 
     return state.streamer && (standalone ?
         null :
-        <SimplyStreamClip key={state.key}
-                          streamer={state.streamer}
-                          onClipEnded={onClipEnded}
-                          showClipTitle={config.information?.clip}
-                          showGameName={config.information?.game}
-                          showStreamerName={config.information?.streamer}/>);
+        <SimplyStreamClip
+            key={state.key}
+            streamer={state.streamer}
+            config={config}
+            onClipEnded={onClipEnded}
+        />);
 }
 
 export default TwitchRandomClips;
