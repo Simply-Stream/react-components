@@ -1,33 +1,18 @@
-import React, { CSSProperties, PropsWithChildren, useEffect, useRef, useState } from "react";
+import React, { PropsWithChildren, useEffect, useRef, useState } from "react";
 import styled from 'styled-components';
 import { Quality } from './TwitchRandomClips';
-import { HelixGame } from '@twurple/api';
+import { HelixClip } from '@twurple/api';
+import { Clip } from '../types/Clip';
 
 const VideoWrapper = styled.div`
 `;
 
-export interface Clip {
-    id: string;
-    url: string;
-    broadcasterId: string;
-    broadcasterName: string;
-    creatorId: string;
-    creatorName: string;
-    gameId: string;
-    game?: string;
-    title: string;
-    thumbnailUrl: string;
-    duration: number;
-    getGame?: () => Promise<HelixGame | null>
-}
-
 export type TwitchClipProps = {
-    clip: Clip,
+    clip: Clip | HelixClip,
     onClipStarted?: () => void,
     onClipEnded?: () => void,
     classNames?: string,
     quality?: Quality,
-    style?: CSSProperties
 }
 
 const TwitchClip = (
@@ -37,7 +22,6 @@ const TwitchClip = (
         onClipEnded = () => null,
         children,
         classNames = '',
-        style,
         quality,
     }: PropsWithChildren<TwitchClipProps>) => {
     const [isLoading, setLoading] = useState<boolean>(true);

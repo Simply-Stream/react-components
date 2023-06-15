@@ -1,14 +1,19 @@
 import styled from 'styled-components';
-import { Clip } from './TwitchClip';
+import { Clip } from '../types/Clip';
+import { HelixClip } from '@twurple/api';
 
-const Clip = styled.span`
+const ClipTitleContainer = styled.span`
   font-size: 125%;
   text-shadow: 1px 1px 2px black;
 `;
 
-const ClipTitle = ({clip}: { clip: Clip }) => {
+export type ClipTitleProps = {
+    clip: Clip | HelixClip
+}
+
+const ClipTitle = ({clip}: ClipTitleProps) => {
     return (
-        <Clip>{clip.title}</Clip>
+        <ClipTitleContainer>{clip.title}</ClipTitleContainer>
     );
 }
 

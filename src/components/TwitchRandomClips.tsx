@@ -1,16 +1,12 @@
-import React, { CSSProperties, useEffect, useMemo, useState } from 'react';
-import { HelixUser } from '@twurple/api';
-import TwitchClip, { Clip } from './TwitchClip';
-import ClipHeader from './ClipHeader';
-import ClipRandomizer from '../util/clip-randomizer';
-import { GameFilter } from '../util/game-filter';
-import CreatorFilter from '../util/creator-filter';
+import React, { CSSProperties, useEffect, useReducer } from 'react';
+import { ClipRandomizerAuthentication } from '../util/clip-randomizer';
+import SimplyStreamClip from './SimplyStreamClip';
 
 export type Quality = '1080' | '720' | '480' | '360' | '160';
 
 export type TwitchRandomClipsConfig = {
     streamers: string[],
-    authentication: { clientId: string, accessToken: string } | { clientId: string, clientSecret: string },
+    authentication?: ClipRandomizerAuthentication,
     allowedClipCreators?: string[],
     deniedClipCreators?: string[],
     allowedGame?: string,
@@ -27,86 +23,77 @@ export type TwitchRandomClipsConfig = {
 }
 
 export type TwitchRandomClipsProps = {
+    standalone?: boolean,
     config: TwitchRandomClipsConfig,
     classNames?: string,
     style?: CSSProperties,
 }
 
-const TwitchRandomClips = ({config, classNames, style}: TwitchRandomClipsProps) => {
-    const [streamers, setStreamers] = useState<HelixUser[]>([]);
-    const [streamersIterable, setStreamersIterable] = useState<HelixUser[]>([]);
-    const [index, setIndex] = useState<number | undefined>();
-    const [clip, setClip] = useState<Clip>();
+export type Streamer = {
+    login: string,
+    id?: string
+};
 
-    const clipRandomizer = useMemo(() => {
-            return new ClipRandomizer(
-                config.authentication,
-                // @TODO: Maybe we'll change this to a more descriptive way in the future ...
-                [
-                    ...(config.allowedGame ? [new GameFilter(config.allowedGame)] : []),
-                    ...(config.deniedGame ? [new GameFilter(config.deniedGame, true)] : []),
-                    ...(config.allowedClipCreators ? [new CreatorFilter(config.allowedClipCreators)] : []),
-                    ...(config.deniedClipCreators ? [new CreatorFilter(config.deniedClipCreators, true)] : []),
-                ],
-            );
-        },
-        [config.authentication],
-    );
-    useMemo(() => clipRandomizer.getUsers(config.streamers), [config.streamers]).then(setStreamers);
+function reducer(state: any, action: any) {
+    switch (action.type) {
+        case 'set_streamers_iterable':
+            return ({
+                ...state,
+                streamersIterable: [...action.streamersIterable],
+            });
+
+        case 'set_streamer':
+            return ({
+                ...state,
+                streamer: action.streamer,
+                key: action.key,
+                index: action.index,
+            });
+
+        default:
+            return state;
+    }
+}
+
+const TwitchRandomClips = ({standalone = true, config, classNames, style}: TwitchRandomClipsProps) => {
+    const [state, dispatch] = useReducer(reducer, {
+        streamers: config.streamers.map(streamer => ({login: streamer})),
+        streamer: null,
+        key: null,
+        streamersIterable: config.streamers.map(streamer => ({login: streamer})),
+        index: null,
+    });
 
     useEffect(() => {
-        if (streamers?.length === 0) return;
-        if (streamersIterable.length === 0) {
-            setStreamersIterable([...streamers]);
+        if (state.streamersIterable.length === 0) {
+            dispatch({
+                type: 'set_streamers_iterable',
+                streamersIterable: [...state.streamers],
+            })
             return;
         }
+        const idx = Math.floor(Math.random() * state.streamersIterable.length);
+        dispatch({type: 'set_streamer', streamer: state.streamersIterable[idx], index: idx, key: Date.now()});
+    }, [state.streamersIterable, config]);
 
-        const idx = Math.floor(Math.random() * streamersIterable.length);
-        const streamer = streamersIterable[idx];
-        setIndex(idx);
 
-        if (!streamer) return;
-        clipRandomizer.getRandomClip(streamer).then(clip => {
-            if (!clip) {
-                // Skip the streamer if there's no clip that suits our requirements
-                onClipEnded(idx);
-                return;
-            }
-
-            // @TODO: This seems to make problems with "getGame()", might need to change it back to use HelixClip instead
-            setClip({
-                broadcasterId: clip.broadcasterId,
-                broadcasterName: clip.broadcasterDisplayName,
-                creatorId: clip.creatorId,
-                creatorName: clip.creatorDisplayName,
-                duration: clip.duration,
-                gameId: clip.gameId,
-                id: clip.id,
-                thumbnailUrl: clip.thumbnailUrl,
-                title: clip.title,
-                url: clip.url,
-                getGame: clip.getGame,
-            });
+    function onClipEnded(): void {
+        const newIterableStreamers = state.streamersIterable;
+        newIterableStreamers.splice(state.index, 1);
+        dispatch({
+            type: 'set_streamers_iterable',
+            streamersIterable: [...newIterableStreamers],
         });
-    }, [streamers, streamersIterable]);
-
-    function onClipEnded(idx?: number): void {
-        streamersIterable.splice(idx ?? index as number, 1);
-        setStreamersIterable([...streamersIterable]);
     }
 
-    return (
-        <>
-            {clip &&
-                <TwitchClip key={clip.id} clip={clip} onClipEnded={onClipEnded} quality={config.quality}>
-                    <ClipHeader clip={clip}
-                                showClipTitle={config.information?.clip}
-                                showGameName={config.information?.game}
-                                showStreamerName={config.information?.streamer}/>
-                </TwitchClip>
-            }
-        </>
-    );
+    return state.streamer && (standalone ?
+        null :
+        <SimplyStreamClip key={state.key}
+                          streamer={state.streamer}
+                          onClipEnded={onClipEnded}
+                          showClipTitle={config.information?.clip}
+                          showGameName={config.information?.game}
+                          showStreamerName={config.information?.streamer}/>);
 }
 
 export default TwitchRandomClips;

@@ -3,7 +3,8 @@ import StreamerName from './StreamerName';
 import GameName from './GameName';
 import ClipTitle from './ClipTitle';
 import styled from 'styled-components';
-import { Clip } from './TwitchClip';
+import { HelixClip } from '@twurple/api';
+import { Clip } from '../types/Clip';
 
 const BackdropWrapper = styled.div`
   background: rgba(0, 0, 0, .25);
@@ -15,7 +16,7 @@ const BackdropWrapper = styled.div`
 `;
 
 export type ClipHeaderProps = {
-    clip: Clip,
+    clip: HelixClip | Clip,
     showClipTitle?: boolean,
     showGameName?: boolean,
     showStreamerName?: boolean,
@@ -26,22 +27,23 @@ export type ClipHeaderProps = {
 const ClipHeader = ({clip, showClipTitle, showStreamerName, showGameName, classNames = ''}: ClipHeaderProps) => {
     return (
         <>
-            {showStreamerName || showGameName || showClipTitle }
-            <BackdropWrapper className={`randomizer_backdrop ${classNames}`}>
-                {showStreamerName &&
-                    <StreamerName
-                        streamer={clip.broadcasterName}/>
-                }
-                {showGameName &&
-                    <GameName game$={clip.getGame ? clip.getGame() : clip.game}/>
-                }
+            {showStreamerName || showGameName || showClipTitle ?
+                <BackdropWrapper className={`randomizer_backdrop ${classNames}`}>
+                    {showStreamerName &&
+                        <StreamerName
+                            streamer={'streamer' in clip ? clip.streamer : clip.broadcasterDisplayName}/>
+                    }
+                    {showGameName &&
+                        <GameName game$={'game' in clip ? clip.game?.name : ('getGame' in clip ? clip.getGame() : '')}/>
+                    }
 
-                {showGameName && showClipTitle && ' - '}
+                    {showGameName && showClipTitle && ' - '}
 
-                {showClipTitle &&
-                    <ClipTitle clip={clip}/>
-                }
-            </BackdropWrapper>
+                    {showClipTitle &&
+                        <ClipTitle clip={clip}/>
+                    }
+                </BackdropWrapper> : ''
+            }
         </>
     )
 }
