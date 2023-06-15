@@ -23,6 +23,7 @@ const SimplyStreamClip: FC<SimplyStreamClipProps> = (
 
     useEffect(() => {
         if (!streamer || !streamer?.login) return;
+
         const controller = new AbortController();
         const params = new URLSearchParams({
             ...(config.startedAt && {started_at: config.startedAt.toString()}),
@@ -36,17 +37,24 @@ const SimplyStreamClip: FC<SimplyStreamClipProps> = (
 
         fetch(`${host}/api/twitch/users/${streamer?.login}/clips/random?${params}`, {signal: controller.signal})
             .then((response) => response.json())
-            .then(data => setClip(data));
+            .then(data => {
+                // @TODO: Retry with another clip or die after x-tries
+                if (data['@type'] === 'hydra:Error') return;
+
+                setClip(data);
+            });
 
         return () => controller.abort();
     }, [streamer])
 
     return clip &&
         <TwitchClip clip={clip} onClipEnded={onClipEnded}>
-            <ClipHeader clip={clip}
-                        showClipTitle={config?.information?.clip ?? false}
-                        showGameName={config?.information?.game ?? false}
-                        showStreamerName={config?.information?.streamer ?? false}/>
+            {!config.hideInfo &&
+                <ClipHeader clip={clip}
+                            showClipTitle={config?.information?.clip ?? false}
+                            showGameName={config?.information?.game ?? false}
+                            showStreamerName={config?.information?.streamer ?? false}/>
+            }
         </TwitchClip>;
 }
 
