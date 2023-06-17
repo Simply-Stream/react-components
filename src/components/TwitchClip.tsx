@@ -1,8 +1,9 @@
-import React, { PropsWithChildren, useEffect, useRef, useState } from "react";
+import React, { PropsWithChildren, useContext, useEffect, useRef, useState } from "react";
 import styled from 'styled-components';
 import { Quality } from './TwitchRandomClips';
 import { HelixClip } from '@twurple/api';
 import { Clip } from '../types/Clip';
+import RandomizerContext from '../context/randomizer';
 
 const VideoWrapper = styled.div`
 `;
@@ -24,6 +25,7 @@ const TwitchClip = (
         classNames = '',
         quality,
     }: PropsWithChildren<TwitchClipProps>) => {
+    const randomizerContext = useContext(RandomizerContext);
     const [isLoading, setLoading] = useState<boolean>(true);
     const videoRef = useRef(null);
     let url = clip.url.startsWith('https://clips-media-assets2.twitch.tv') ? clip.url : clip.thumbnailUrl;
@@ -33,6 +35,24 @@ const TwitchClip = (
         url = url.replace(lastSegment, 'AT-cm%7C' + lastSegment);
     }
     url = url.replace('-preview-480x272.jpg', `${quality ? '-' + quality : ''}.mp4`);
+
+    useEffect(() => {
+        if (!videoRef.current) return;
+
+        const video: HTMLVideoElement = videoRef.current;
+        if (randomizerContext.state === 'playing' && video.paused) {
+            video.play();
+        }
+
+        if (randomizerContext.state === 'stopped' && !video.paused) {
+            video.pause();
+        }
+
+        if (randomizerContext.state === 'restart') {
+            video.currentTime = 0;
+            randomizerContext.setState({...randomizerContext, state: 'playing'})
+        }
+    }, [randomizerContext.state])
 
     useEffect(() => {
         if (!videoRef || !videoRef.current) return;

@@ -112,7 +112,7 @@ const TwitchRandomClips = ({standalone = true, config, classNames, style}: Twitc
             dispatch({
                 type: 'set_streamers_iterable',
                 streamers: state.streamers,
-                streamersIterable: state.streamers.map((streamer: Streamer | HelixUser) => (standalone ? streamer : {login: streamer})),
+                streamersIterable: state.streamers.map((streamer: Streamer | HelixUser) => (standalone ? streamer : streamer)),
                 key: null,
             })
             return;
