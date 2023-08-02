@@ -34,7 +34,7 @@ const TwitchClip = (
         const lastSegment = url.split('/').at(-1) ?? '';
         url = url.replace(lastSegment, 'AT-cm%7C' + lastSegment);
     }
-    url = url.replace('-preview-480x272.jpg', `${quality ? '-' + quality : ''}.mp4`);
+    url = url.replace('-preview-480x272.jpg', `${quality !== '1080' ? '-' + quality : ''}.mp4`);
 
     useEffect(() => {
         if (!videoRef.current) return;
