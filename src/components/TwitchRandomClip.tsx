@@ -19,10 +19,9 @@ const TwitchRandomClip: FC<TwitchRandomClipProps> = ({streamer, randomizer, conf
         throw Error('Authentication mandatory');
     }
 
-    // @ts-ignore
     useEffect(() => {
         if (streamer.id) {
-            return () => randomizer.getRandomClip(streamer).then(clip => setClip(clip));
+            randomizer.getRandomClip(streamer).then(clip => setClip(clip));
         }
     }, [streamer])
 
