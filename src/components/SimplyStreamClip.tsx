@@ -48,7 +48,7 @@ const SimplyStreamClip: FC<SimplyStreamClipProps> = (
     }, [streamer])
 
     return clip &&
-        <TwitchClip clip={clip} onClipEnded={onClipEnded}>
+        <TwitchClip clip={clip} quality={config?.quality ?? '1080'} onClipEnded={onClipEnded}>
             {!config.hideInfo &&
                 <ClipHeader clip={clip}
                             showClipTitle={config?.information?.clip ?? false}
