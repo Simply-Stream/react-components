@@ -25,15 +25,19 @@ const TwitchRandomClip: FC<TwitchRandomClipProps> = ({streamer, randomizer, conf
         }
     }, [streamer])
 
-    return clip &&
-        <TwitchClip clip={clip} quality={config?.quality ?? '1080'} onClipEnded={onClipEnded}>
-            {!config.hideInfo &&
-                <ClipHeader clip={clip}
-                            showClipTitle={config?.information?.clip ?? false}
-                            showGameName={config?.information?.game ?? false}
-                            showStreamerName={config?.information?.streamer ?? false}/>
-            }
-        </TwitchClip>;
+    return (
+        <>
+            {clip &&
+                <TwitchClip clip={clip} quality={config?.quality ?? '1080'} onClipEnded={onClipEnded}>
+                    {!config.hideInfo &&
+                        <ClipHeader clip={clip}
+                                    showClipTitle={config?.information?.clip ?? false}
+                                    showGameName={config?.information?.game ?? false}
+                                    showStreamerName={config?.information?.streamer ?? false}/>
+                    }
+                </TwitchClip>}
+        </>
+    );
 }
 
 export default TwitchRandomClip;

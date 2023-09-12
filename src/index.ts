@@ -1,5 +1,3 @@
-import { RandomizerProvider } from './context/randomizer';
-
 export { default as TwitchClips, type TwitchClipProps } from './components/TwitchClip';
 export {
     default as TwitchRandomClips, type TwitchRandomClipsProps, type TwitchRandomClipsConfig,

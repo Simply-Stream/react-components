@@ -47,15 +47,20 @@ const SimplyStreamClip: FC<SimplyStreamClipProps> = (
         return () => controller.abort();
     }, [streamer])
 
-    return clip &&
-        <TwitchClip clip={clip} quality={config?.quality ?? '1080'} onClipEnded={onClipEnded}>
-            {!config.hideInfo &&
-                <ClipHeader clip={clip}
-                            showClipTitle={config?.information?.clip ?? false}
-                            showGameName={config?.information?.game ?? false}
-                            showStreamerName={config?.information?.streamer ?? false}/>
+    return (
+        <>
+            {clip &&
+                <TwitchClip clip={clip} quality={config?.quality ?? '1080'} onClipEnded={onClipEnded}>
+                    {!config.hideInfo &&
+                        <ClipHeader clip={clip}
+                                    showClipTitle={config?.information?.clip ?? false}
+                                    showGameName={config?.information?.game ?? false}
+                                    showStreamerName={config?.information?.streamer ?? false}/>
+                    }
+                </TwitchClip>
             }
-        </TwitchClip>;
+        </>
+    );
 }
 
 export default SimplyStreamClip;

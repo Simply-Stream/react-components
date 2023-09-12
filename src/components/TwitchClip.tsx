@@ -16,6 +16,22 @@ export type TwitchClipProps = {
     quality?: Quality,
 }
 
+const qualities: Quality[] = [
+    '1080',
+    '720',
+    '480',
+    '360',
+    '160',
+]
+
+function constructClipUrl(quality: "1080" | "720" | "480" | "360" | "160" | undefined, url: string, previousQuality?: string) {
+    if (quality && quality !== '1080' && url.indexOf('AT-cm%7C') === -1) {
+        const lastSegment = url.split('/').at(-1) ?? '';
+        url = url.replace(lastSegment, 'AT-cm%7C' + lastSegment);
+    }
+    return url.replace(previousQuality ? `-${previousQuality}.mp4` : '-preview-480x272.jpg', `${quality !== '1080' ? '-' + quality : ''}.mp4`);
+}
+
 const TwitchClip = (
     {
         clip,
@@ -28,13 +44,8 @@ const TwitchClip = (
     const randomizerContext = useContext(RandomizerContext);
     const [isLoading, setLoading] = useState<boolean>(true);
     const videoRef = useRef(null);
-    let url = clip.url.startsWith('https://clips-media-assets2.twitch.tv') ? clip.url : clip.thumbnailUrl;
-
-    if (quality && quality !== '1080' && url.indexOf('AT-cm%7C') === -1) {
-        const lastSegment = url.split('/').at(-1) ?? '';
-        url = url.replace(lastSegment, 'AT-cm%7C' + lastSegment);
-    }
-    url = url.replace('-preview-480x272.jpg', `${quality !== '1080' ? '-' + quality : ''}.mp4`);
+    let currentQualityIndex = qualities.findIndex(value => value === quality);
+    let url = constructClipUrl(quality, clip.url.startsWith('https://clips-media-assets2.twitch.tv') ? clip.url : clip.thumbnailUrl);
 
     useEffect(() => {
         if (!videoRef.current) return;
@@ -72,7 +83,15 @@ const TwitchClip = (
         };
         video.onerror = () => {
             setLoading(true);
-            onClipEnded();
+
+            if (quality && currentQualityIndex > 0) {
+                currentQualityIndex -= 1;
+                url = constructClipUrl(qualities[currentQualityIndex], clip.url.startsWith('https://clips-media-assets2.twitch.tv') ? clip.url : clip.thumbnailUrl, qualities[currentQualityIndex + 1]);
+                video.src = url;
+                video.load();
+            } else {
+                onClipEnded();
+            }
         };
         video.load();
     }, [videoRef])
@@ -93,8 +112,7 @@ const TwitchClip = (
                 </div>
             }
             {children}
-            <video height={'100%'} width={'100%'} ref={videoRef}
-                   poster={clip.thumbnailUrl} src={url}/>
+            <video height={'100%'} width={'100%'} ref={videoRef} src={url}/>
         </VideoWrapper>
     )
 }
