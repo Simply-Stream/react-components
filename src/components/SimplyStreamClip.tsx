@@ -6,7 +6,6 @@ import { Clip } from '../types/Clip';
 
 type SimplyStreamClipProps = {
     streamer?: Streamer,
-    host?: string,
     config: TwitchRandomClipsConfig,
     onClipEnded?: () => void,
 }
@@ -14,12 +13,12 @@ type SimplyStreamClipProps = {
 const SimplyStreamClip: FC<SimplyStreamClipProps> = (
     {
         streamer,
-        host = 'https://api.simply-stream.com',
         config,
         onClipEnded = () => {
         },
     }) => {
     const [clip, setClip] = useState<Clip>();
+    const [show, setShow] = useState<boolean>(!config.skipClipOnError ?? true);
 
     useEffect(() => {
         if (!streamer || !streamer?.login) return;
@@ -35,7 +34,7 @@ const SimplyStreamClip: FC<SimplyStreamClipProps> = (
             ...(config.quality && {quality: config.quality}),
         });
 
-        fetch(`${host}/api/twitch/users/${streamer?.login}/clips/random?${params}`, {signal: controller.signal})
+        fetch(`${config.host ?? 'https://api.simply-stream.com'}/api/twitch/users/${streamer?.login}/clips/random?${params}`, {signal: controller.signal})
             .then((response) => response.json())
             .then(data => {
                 // @TODO: Retry with another clip or die after x-tries
@@ -47,11 +46,22 @@ const SimplyStreamClip: FC<SimplyStreamClipProps> = (
         return () => controller.abort();
     }, [streamer])
 
+    function clipEnded() {
+        if (config.skipClipOnError) setShow(false);
+
+        if (onClipEnded) onClipEnded();
+    }
+
+    function onClipStarted() {
+        if (config.skipClipOnError) setShow(true);
+    }
+
     return (
         <>
             {clip &&
-                <TwitchClip clip={clip} quality={config?.quality ?? '1080'} onClipEnded={onClipEnded}>
-                    {!config.hideInfo &&
+                <TwitchClip clip={clip} quality={config?.quality ?? '1080'} onClipEnded={clipEnded}
+                            onClipStarted={onClipStarted} skipOnError={config.skipClipOnError}>
+                    {show && !config.hideInfo &&
                         <ClipHeader clip={clip}
                                     showClipTitle={config?.information?.clip ?? false}
                                     showGameName={config?.information?.game ?? false}

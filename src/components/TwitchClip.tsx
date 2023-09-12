@@ -14,6 +14,7 @@ export type TwitchClipProps = {
     onClipEnded?: () => void,
     classNames?: string,
     quality?: Quality,
+    skipOnError?: boolean
 }
 
 const qualities: Quality[] = [
@@ -40,6 +41,7 @@ const TwitchClip = (
         children,
         classNames = '',
         quality,
+        skipOnError = false,
     }: PropsWithChildren<TwitchClipProps>) => {
     const randomizerContext = useContext(RandomizerContext);
     const [isLoading, setLoading] = useState<boolean>(true);
@@ -84,7 +86,7 @@ const TwitchClip = (
         video.onerror = () => {
             setLoading(true);
 
-            if (quality && currentQualityIndex > 0) {
+            if (!skipOnError && quality && currentQualityIndex > 0) {
                 currentQualityIndex -= 1;
                 url = constructClipUrl(qualities[currentQualityIndex], clip.url.startsWith('https://clips-media-assets2.twitch.tv') ? clip.url : clip.thumbnailUrl, qualities[currentQualityIndex + 1]);
                 video.src = url;
@@ -112,7 +114,8 @@ const TwitchClip = (
                 </div>
             }
             {children}
-            <video height={'100%'} width={'100%'} ref={videoRef} src={url}/>
+            <video height={'100%'} width={'100%'} ref={videoRef} src={url}
+                   poster={!skipOnError ? clip.thumbnailUrl : ''}/>
         </VideoWrapper>
     )
 }

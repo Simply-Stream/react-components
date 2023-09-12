@@ -14,6 +14,7 @@ type TwitchRandomClipProps = {
 
 const TwitchRandomClip: FC<TwitchRandomClipProps> = ({streamer, randomizer, config, onClipEnded}) => {
     const [clip, setClip] = useState<HelixClip>();
+    const [show, setShow] = useState<boolean>(!config.skipClipOnError ?? true);
 
     if (!config.authentication) {
         throw Error('Authentication mandatory');
@@ -25,11 +26,26 @@ const TwitchRandomClip: FC<TwitchRandomClipProps> = ({streamer, randomizer, conf
         }
     }, [streamer])
 
+    function clipEnded() {
+        if (config.skipClipOnError) setShow(false);
+
+        if (onClipEnded) onClipEnded();
+    }
+
+    function clipStarted() {
+        if (config.skipClipOnError) setShow(true);
+    }
+
     return (
         <>
             {clip &&
-                <TwitchClip clip={clip} quality={config?.quality ?? '1080'} onClipEnded={onClipEnded}>
-                    {!config.hideInfo &&
+                <TwitchClip
+                    clip={clip}
+                    quality={config?.quality ?? '1080'}
+                    onClipEnded={clipEnded}
+                    onClipStarted={clipStarted}
+                    skipOnError={config.skipClipOnError}>
+                    {show && !config.hideInfo &&
                         <ClipHeader clip={clip}
                                     showClipTitle={config?.information?.clip ?? false}
                                     showGameName={config?.information?.game ?? false}

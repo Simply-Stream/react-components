@@ -1,4 +1,4 @@
-import React, { CSSProperties, useEffect, useMemo, useReducer } from 'react';
+import React, { useEffect, useMemo, useReducer } from 'react';
 import ClipRandomizer, { ClipRandomizerAuthentication } from '../util/clip-randomizer';
 import SimplyStreamClip from './SimplyStreamClip';
 import TwitchRandomClip from './TwitchRandomClip';
@@ -24,13 +24,13 @@ export type TwitchRandomClipsConfig = {
     startedAt?: number,
     endedAt?: number,
     quality?: Quality,
+    host?: string,
+    skipClipOnError?: boolean
 }
 
 export type TwitchRandomClipsProps = {
     standalone?: boolean,
     config: TwitchRandomClipsConfig,
-    classNames?: string,
-    style?: CSSProperties,
 }
 
 export type Streamer = {
@@ -60,7 +60,7 @@ function reducer(state: any, action: any) {
     }
 }
 
-const TwitchRandomClips = ({standalone = true, config, classNames, style}: TwitchRandomClipsProps) => {
+const TwitchRandomClips = ({standalone = true, config}: TwitchRandomClipsProps) => {
     const [state, dispatch] = useReducer(reducer, {
         key: null,
         index: null,
@@ -130,23 +130,28 @@ const TwitchRandomClips = ({standalone = true, config, classNames, style}: Twitc
             type: 'set_streamers_iterable',
             streamers: state.streamers,
             streamersIterable: newIterableStreamers,
+            hide: config.skipClipOnError,
         });
     }
 
-    return state.streamer && (standalone ?
-            <TwitchRandomClip
-                key={state.key}
-                streamer={state.streamer}
-                randomizer={clipRandomizer!}
-                config={config}
-                onClipEnded={onClipEnded}
-            /> :
-            <SimplyStreamClip
-                key={state.key}
-                streamer={state.streamer}
-                config={config}
-                onClipEnded={onClipEnded}
-            />
+    return (
+        <>
+            {state.streamer && (standalone ?
+                    <TwitchRandomClip
+                        key={state.key}
+                        streamer={state.streamer}
+                        randomizer={clipRandomizer!}
+                        config={config}
+                        onClipEnded={onClipEnded}
+                    /> :
+                    <SimplyStreamClip
+                        key={state.key}
+                        streamer={state.streamer}
+                        config={config}
+                        onClipEnded={onClipEnded}
+                    />
+            )}
+        </>
     );
 }
 
