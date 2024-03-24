@@ -37,8 +37,12 @@ const SimplyStreamClip: FC<SimplyStreamClipProps> = (
         fetch(`${config.host ?? 'https://api.simply-stream.com'}/api/twitch/users/${streamer?.login}/clips/random?${params}`, {signal: controller.signal})
             .then((response) => response.json())
             .then(data => {
-                // @TODO: Retry with another clip or die after x-tries
-                if (data['@type'] === 'hydra:Error') return;
+                // @TODO: Retry with another clip or die after x-tries. For now, skip streamer
+                if (data['@type'] === 'hydra:Error') {
+                    if (onClipEnded) onClipEnded();
+
+                    return;
+                }
 
                 setClip(data);
             });
